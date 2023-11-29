@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEG Memory Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #image-container {
+            display: none;
+        }
+
+        #completion-message {
+            display: none;
+        }
+		
+		#num {
+            color: blue;
+            font-size: 150px;
+        }
+		
+		#value {
+            color: red;
+            font-size: 70px;
+        }
+		
+		#button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px; 
+        }
+
+        #btn_show {
+            width: 150px;
+        }
+		
+		#btn_nxt{
+			width: 150px;
+		}
+		
+		#completion-message p {
+            font-size: 70px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="start-container">
+        <button onclick="startGame()" style="font-weight: bold;">Start</button>
+    </div>
+
+    <div class="container" id="game-container" style="display: none;">
+        <div id="image-container">
+            <p id="num"></p>
+            <div id="value" style="display: none;"></div>
+			<div id="button-container">
+					<button id="btn_show" onclick="showImage()" style="margin-right: 20px;font-weight: bold;">Show Image</button>
+					<button id="btn_nxt" onclick="nextItem()" style="margin-left: 20px;font-weight: bold;">Next</button>
+			</div>
+        </div>
+        <div id="completion-message">
+            <p>Excellent! You have remembered all PEG images.</p>
+            <button onclick="playAgain()" style="font-weight: bold;">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let currentIndex;
+        let shuffledArray;
+        let completedItems;
+		let a = [
+{num: '00',image: 'Sause'},
+{num: '01',image: 'Soda'},
+{num: '02',image: 'Sun'},
+{num: '03',image: 'Sim'},
+{num: '04',image: 'Saree'},
+{num: '05',image: 'Sail'},
+{num: '06',image: 'Suji'},
+{num: '07',image: 'Sack'},
+{num: '08',image: 'Sofa'},
+{num: '09',image: 'Soap'},
+
+{num: '10',image: 'Dosa'},
+{num: '11',image: 'Dad'},
+{num: '12',image: 'Don'},
+{num: '13',image: 'Dam'},
+{num: '14',image: 'Door'},
+{num: '15',image: 'Doll'},
+{num: '16',image: 'Dish'},
+{num: '17',image: 'Duck'},
+{num: '18',image: 'Dove'},
+{num: '19',image: 'Deep'},
+
+{num: '20',image: 'Nose'},
+{num: '21',image: 'Net'},
+{num: '22',image: 'Nun'},
+{num: '23',image: 'Neem'},
+{num: '24',image: 'Nehru'},
+{num: '25',image: 'Nail'},
+{num: '26',image: 'Nach'},
+{num: '27',image: 'Neck'},
+{num: '28',image: 'Knife'},
+{num: '29',image: 'Nap'},
+
+{num: '30',image: 'Mouse'},
+{num: '31',image: 'Mat'},
+{num: '32',image: 'Moon'},
+{num: '33',image: 'Mummy'},
+{num: '34',image: 'Moor'},
+{num: '35',image: 'Mail'},
+{num: '36',image: 'Match'},
+{num: '37',image: 'Mike'},
+{num: '38',image: 'Movie'},
+{num: '39',image: 'Map'},
+
+{num: '40',image: 'Rose'},
+{num: '41',image: 'Rat'},
+{num: '42',image: 'Rain'},
+{num: '43',image: 'Rum'},
+{num: '44',image: 'Roar'},
+{num: '45',image: 'Rail'},
+{num: '46',image: 'Raja'},
+{num: '47',image: 'Rock'},
+{num: '48',image: 'Roof'},
+{num: '49',image: 'Roap'},
+
+{num: '50',image: 'Lace'},
+{num: '51',image: 'Lead'},
+{num: '52',image: 'Lawn'},
+{num: '53',image: 'Lime'},
+{num: '54',image: 'Lorry'},
+{num: '55',image: 'Lilly'},
+{num: '56',image: 'Leach'},
+{num: '57',image: 'Lock'},
+{num: '58',image: 'Leaf'},
+{num: '59',image: 'Lip'},
+
+{num: '60',image: 'Cheese'},
+{num: '61',image: 'Chat'},
+{num: '62',image: 'Chain'},
+{num: '63',image: 'Chime'},
+{num: '64',image: 'Chair'},
+{num: '65',image: 'Chilly'},
+{num: '66',image: 'Cha-Cha'},
+{num: '67',image: 'Chalk'},
+{num: '68',image: 'Chef'},
+{num: '69',image: 'Chop'},
+
+{num: '70',image: 'Case'},
+{num: '71',image: 'Cat'},
+{num: '72',image: 'Coin'},
+{num: '73',image: 'Cap'},
+{num: '74',image: 'Car'},
+{num: '75',image: 'Coil'},
+{num: '76',image: 'Kaju'},
+{num: '77',image: 'Cake'},
+{num: '78',image: 'Coffee'},
+{num: '79',image: 'Cap'},
+
+{num: '80',image: 'Face'},
+{num: '81',image: 'Fat'},
+{num: '82',image: 'Fan'},
+{num: '83',image: 'Foam'},
+{num: '84',image: 'Fire'},
+{num: '85',image: 'File'},
+{num: '86',image: 'Fish'},
+{num: '87',image: 'Fig'},
+{num: '88',image: 'Fifa'},
+{num: '89',image: 'Fab'},
+
+{num: '90',image: 'Bus'},
+{num: '91',image: 'Bat'},
+{num: '92',image: 'Bone'},
+{num: '93',image: 'Bomb'},
+{num: '94',image: 'Bear'},
+{num: '95',image: 'Ball'},
+{num: '96',image: 'Beach'},
+{num: '97',image: 'Bike'},
+{num: '98',image: 'Puff'},
+{num: '99',image: 'Baby'}];
+
+        function startGame() {
+            document.getElementById('start-container').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+
+            currentIndex = 0;
+            completedItems = [];
+            shuffledArray = shuffle(a);
+            showNextItem();
+        }
+
+        function showNextItem() {
+            if (currentIndex < shuffledArray.length) {
+                const numElement = document.getElementById('num');
+                const imageContainer = document.getElementById('image-container');
+                const valueElement = document.getElementById('value');
+				
+                numElement.textContent = `${shuffledArray[currentIndex].num}`;
+                imageContainer.style.display = 'block';
+                valueElement.style.display = 'none';
+                document.getElementById('completion-message').style.display = 'none';
+            } else {
+                document.getElementById('image-container').style.display = 'none';
+                document.getElementById('completion-message').style.display = 'block';
+            }
+        }
+
+        function showImage() {
+            const valueElement = document.getElementById('value');
+            valueElement.textContent = `${shuffledArray[currentIndex].image}`;
+            valueElement.style.display = 'block';
+        }
+
+        function nextItem() {
+            completedItems.push(shuffledArray[currentIndex]);
+            currentIndex++;
+            showNextItem();
+        }
+
+        function playAgain() {
+            document.getElementById('start-container').style.display = 'block';
+            document.getElementById('game-container').style.display = 'none';
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]
+                ];
+            }
+
+            return array;
+        }
+    </script>
+</body>
+</html>
