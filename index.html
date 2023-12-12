@@ -50,6 +50,11 @@
 			width: 150px;
 		}
 		
+		#btn_submit{
+			margin-top: 10px;
+			horizon
+		}
+		
 		#completion-message p {
             font-size: 40px;
             color: green;
@@ -66,7 +71,7 @@
 </head>
 <body>
     <div class="container" id="start-container">
-        <button onclick="startGame()" style="font-weight: bold;">Start</button>
+        <button onclick="startGame()" style="font-weight: bold; font-size: 20px">Start</button>
     </div>
 
     <div class="container" id="game-container" style="display: none;">
@@ -74,8 +79,8 @@
             <p id="num"></p>
             <div id="value" style="display: none;"></div>
 			<div id="button-container">
-					<button id="btn_show" onclick="showImage()" style="margin-right: 20px;font-weight: bold;">Show Image</button>
-					<button id="btn_nxt" onclick="nextItem()" style="margin-left: 20px;font-weight: bold;">Next</button>
+					<button id="btn_show" onclick="showImage()" style="margin-right: 20px;font-weight: bold;">&larr; Show Image</button>
+					<button id="btn_nxt" onclick="nextItem();" style="margin-left: 20px; font-weight: bold;">Next &rarr;</button>
 			</div>
         </div>
         <div id="completion-message">
@@ -86,13 +91,15 @@
     </div>
 
     <script>
+		window.onload = askUserMode;
+
         let currentIndex;
         let shuffledArray;
         let completedItems;
         let startTime;
 		let timerInterval;
 
-		let a = [
+let a = [
 {num: '00',image: 'Sause'},
 {num: '01',image: 'Soda'},
 {num: '02',image: 'Sun'},
@@ -203,7 +210,75 @@
 {num: '98',image: 'Puff'},
 {num: '99',image: 'Baby'}];
 
+		document.addEventListener('keydown', function(event) {
+			if (event.key === 'ArrowRight') {
+				nextItem();
+			}
+			
+			if (event.key === 'ArrowLeft') {
+				showImage();
+			}
+		});
+
+		let currentMode = 'numberToImage'; // Initial mode
+
+		
+		function askUserMode() {
+			const container = document.createElement('div');
+			container.innerHTML = `
+				 <div style="text-align: center; margin-top: 20px; font-size: 18px; font-weight: bold;">
+					<p>How do you want to play?</p>
+					<input type="radio" id="radioNumberToImage" name="gameMode" value="numberToImage" checked>
+					<label for="radioNumberToImage">Number to Image</label>
+
+					<input type="radio" id="radioImageToNumber" name="gameMode" value="imageToNumber">
+					<label for="radioImageToNumber">Image to Number</label>
+
+					<br>
+
+					<button style="margin-top: 20px; background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer; border-radius: 5px;" onclick="selectGameMode()">Start</button>
+				</div>
+			`;
+
+			document.body.appendChild(container);
+			hideStartButton();
+		}
+
+		function selectGameMode() {
+			const radioNumberToImage = document.getElementById('radioNumberToImage');
+			const radioImageToNumber = document.getElementById('radioImageToNumber');
+
+			if (radioNumberToImage.checked) {
+				currentMode = 'numberToImage';
+			} else if (radioImageToNumber.checked) {
+				currentMode = 'imageToNumber';
+			} else {
+				currentMode = 'numberToImage';
+			}
+
+			document.body.removeChild(document.body.lastChild); // Remove the radio button container
+			updateButtonText();
+			startGame();
+		}
+		
+		function hideStartButton() {
+			document.getElementById('start-container').style.display = 'none';
+		}
+
+		function showStartButton() {
+			document.getElementById('start-container').style.display = 'block';
+		}
+		
+		function updateButtonText() {
+			const showImageBtn = document.getElementById('btn_show');
+			showImageBtn.textContent = (currentMode === 'numberToImage') ? 'Show Image' : 'Show Number';
+		}
+
         function startGame() {
+			if (!currentMode) {
+				askUserMode(); // Ask the user mode if not chosen yet
+				return;
+			}
 			startTime = new Date();
 			updateTimer();
             document.getElementById('start-container').style.display = 'none';
@@ -220,9 +295,17 @@
 				const imageContainer = document.getElementById('image-container');
 				const valueElement = document.getElementById('value');
 						
-				numElement.textContent = `${shuffledArray[currentIndex].num}`;
-				imageContainer.style.display = 'block';
-				valueElement.style.display = 'none';
+				if (currentMode === 'numberToImage') {
+					numElement.textContent = `${shuffledArray[currentIndex].num}`;
+					imageContainer.style.display = 'block';
+					valueElement.style.display = 'none';
+				} else {
+				numElement.textContent = `${shuffledArray[currentIndex].image}`;
+					imageContainer.style.display = 'block';
+					valueElement.style.display = 'none';
+				
+				}
+
 				document.getElementById('completion-message').style.display = 'none';
 			} else {
 				document.getElementById('image-container').style.display = 'none';
@@ -236,8 +319,14 @@
 
         function showImage() {
             const valueElement = document.getElementById('value');
-            valueElement.textContent = `${shuffledArray[currentIndex].image}`;
-            valueElement.style.display = 'block';
+
+			if (currentMode === 'numberToImage') {
+				valueElement.textContent = `${shuffledArray[currentIndex].image}`;
+			} else {
+				valueElement.textContent = `${shuffledArray[currentIndex].num}`;
+			}
+
+			valueElement.style.display = 'block';
         }
 
         function nextItem() {
@@ -249,6 +338,7 @@
         function playAgain() {
             document.getElementById('start-container').style.display = 'block';
             document.getElementById('game-container').style.display = 'none';
+			askUserMode();
         }
 
         function shuffle(array) {
